@@ -1,0 +1,6 @@
+## This file is managed by Ansible ##
+
+127.0.0.1	localhost
+{% for host in hosts_list %}
+	{{ host.ipaddr }}  {{ host.name }}
+{% endfor %}

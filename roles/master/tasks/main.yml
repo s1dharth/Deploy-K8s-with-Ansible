@@ -1,0 +1,4 @@
+---
+# tasks file for master
+- name: Installing repository for kubernetes
+

@@ -1,0 +1,122 @@
+---
+# tasks file for common
+- name: Setting hostname
+  command: hostnamectl set-hostname {{ inventory_hostname }}
+
+- name: Configuring /etc/hosts files
+  template:
+    src: etc_hosts.j2
+    dest: /etc/hosts
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Disabling SELinux on all hosts
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=disabled'
+    owner: root
+    group: root
+    mode: 0644
+    state: present
+
+- name: Configuring static IP Address on all hosts
+  template:
+    src: network_scripts.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{ ansible_default_ipv4.interface }}
+    owner: root
+    group: root
+    mode: 0644
+
+- name: create .ssh directory
+  file:
+    path: /root/.ssh
+    state: directory
+    mode: 0700
+
+- name: install private key file
+  copy:
+    src: /home/code/.ssh/id_rsa
+    dest: /root/.ssh/id_rsa
+    mode: 0600
+  ignore_errors: yes
+
+- name: Configuring Firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: False
+
+- name: Enabling br_netfilter kernel module
+  command: modprobe br_netfilter
+  register: result
+
+- name: Setting value to 1 in /proc/sys/net/bridge/bridge-nf-call-iptables
+  command: echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
+  when: result.rc==0
+
+  #- name: Testing inventory_hostname
+  #debug:
+  #  msg: "{{ inventory_hostname }}"
+
+- name: Rebooting the nodes
+  shell: sleep 2 && shutdown -r now "Ansible configuration triggered"
+  async: 1
+  poll: 0
+  become: true
+  ignore_errors: true
+
+- name: Waiting for nodes to come back
+  wait_for:
+    port: 22
+    host: "{{ inventory_hostname }}"
+    state: started
+    delay: 10
+    timeout: 200
+  delegate_to: localhost
+  become: false
+
+    #- name: Ensure /dev/sr0 is mounted
+    #mount:
+    #path: /mnt
+    #src: /dev/sr0
+    #fstype: iso9660
+    #opts: defaults
+    #state: mounted
+
+    #- name: Install repo centos-dvd.repo
+    #copy:
+    #src: centos-dvd.repo
+    #dest: /etc/yum.repos.d/centos-dvd.repo
+    #mode: 0644
+    #owner: root
+    #group: root
+
+    #- name: Install epel-release
+    #yum:
+    #name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    #state: present  
+
+- name: Installing Pre-requisite packages
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ req_packages }}"
+
+- name: Configuring repositories Docker
+  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  register: docker_repo
+
+- name: Installing Docker
+  package:
+    name: docker-ce
+    state: latest
+  when: docker_repo.rc==0
+  register: docker_pkg
+
+- name: Ensuring Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: true

@@ -1,0 +1,5 @@
+[centos-dvd]
+name= centos dvd
+baseurl= file:///mnt
+gpgcheck= 0
+enabled= 1

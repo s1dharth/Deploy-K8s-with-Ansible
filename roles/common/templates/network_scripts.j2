@@ -1,0 +1,10 @@
+NAME= {{ ansible_default_ipv4.interface }}
+TYPE=Ethernet
+BOOTPROTO=none
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPADDR={{ ansible_default_ipv4.address }}
+NETMASK={{ ansible_default_ipv4.netmask }}
+GATEWAY={{ ansible_default_ipv4.gateway }}
+DEVICE={{ ansible_default_ipv4.interface }}
+ONBOOT=yes
