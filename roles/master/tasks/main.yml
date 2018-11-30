@@ -1,4 +1,96 @@
 ---
 # tasks file for master
-- name: Installing repository for kubernetes
+- name: configuring k8s-master /etc/kubernetes/config
+  template:
+    src: k8s_config.j2
+    dest: /etc/kubernetes/config
+    mode: 0644
+    owner: root
+    group: root
 
+- name: configuring etcd on master /etc/etcd/etcd.conf
+  template:
+    src: etcd.conf.j2
+    dest: /etc/etcd/etcd.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Creating directory /srv/kubernetes for kubernetes API authentication certificates
+  file:
+    path: /srv/kubernetes
+    state: directory
+    mode: 0755
+
+- name: Creating ca.key
+  command: openssl genrsa -out /srv/kubernetes/ca.key 2048
+
+- name: Assign MASTER_IP variable with Master IP
+  shell: "MASTER_IP={{ ansible_default_ipv4.address }}"
+
+- name: Generate ca.crt according to ca.key
+  command: openssl req -x509 -new -nodes -key /srv/kubernetes/ca.key -subj "/CN=${MASTER_IP}" -days 10000 -out /srv/kubernetes/ca.crt
+
+- name: Generate server.key
+  command: openssl  genrsa -out /srv/kubernetes/server.key 2048
+
+- name: Create csr.conf file to generate csr
+  template:
+    src: csr.conf.j2
+    dest: /srv/kubernetes/csr.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Generate csr based on csr.conf
+  command: openssl req -new -key /srv/kubernetes/server.key -out /srv/kubernetes/server.csr -config /srv/kubernetes/csr.conf
+
+- name: Generate server certificate using ca.key, ca.crt and server.csr
+  command: openssl x509 -req -in /srv/kubernetes/server.csr -CA /srv/kubernetes/ca.crt -CAkey /srv/kubernetes/ca.key -CAcreateserial -out /srv/kubernetes/server.crt -days 10000 -extensions v3_ext -extfile /srv/kubernetes/csr.conf
+
+- name: Configure K8s API server, /etc/kubernetes/apiserver file
+  template:
+    src: apiserver.j2
+    dest: /etc/kubernetes/apiserver
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Configure K8s controller manager, /etc/kubernetes/controller-manager
+  template:
+    src: controller-manager.j2
+    dest: /etc/kubernetes/controller-manager
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Start and enable etcd service
+  service:
+    name: etcd
+    state: started
+    enabled: yes
+
+- name: Create new key in etcd to store flannel configuration
+  command: etcdctl mkdir /kube-centos/network
+
+- name: create config
+  command: etcdctl mk /kube-centos/network/config "{\"Network\":\"172.30.0.0/16\",\"SubnetLen\":24,\"Backend\":{\"Type\":\"vxlan\"}}"
+
+- name: flanneld configuration in /etc/sysconfig/flanneld
+  template:
+    src: flanneld.j2
+    dest: /etc/sysconfig/flanneld
+    mode: 0644
+    owner: root
+    group: root
+
+- name: start and enable kube-apiserver, kube-controller-manager, kube-scheduler, flanneld services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+    - flanneld

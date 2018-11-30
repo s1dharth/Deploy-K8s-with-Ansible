@@ -1,5 +1,6 @@
 ---
-# vars file for common
+# vars file for nodes
+
 hosts_list:
   - name: master.example.com
     ipaddr: 172.25.230.182
@@ -8,7 +9,6 @@ hosts_list:
   - name: node3.example.com
     ipaddr: 172.25.230.129
 
-req_packages:
-  - yum-utils
-  - device-mapper-persistent-data
-  - lvm2
+#master_pkgs:
+#  - etcd
+#  - flanneld

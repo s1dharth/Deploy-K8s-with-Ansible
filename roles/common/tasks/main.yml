@@ -37,7 +37,7 @@
 
 - name: install private key file
   copy:
-    src: /home/code/.ssh/id_rsa
+    src: /root/.ssh/id_rsa
     dest: /root/.ssh/id_rsa
     mode: 0600
   ignore_errors: yes
@@ -108,15 +108,15 @@
   command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   register: docker_repo
 
-- name: Installing Docker
-  package:
-    name: docker-ce
-    state: latest
-  when: docker_repo.rc==0
-  register: docker_pkg
+#- name: Installing Docker
+#  package:
+#    name: docker-ce
+#    state: latest
+#  when: docker_repo.rc==0
+#  register: docker_pkg
 
-- name: Ensuring Docker service is running
-  service:
-    name: docker
-    state: started
-    enabled: true
+#- name: Ensuring Docker service is running
+#  service:
+#    name: docker
+#    state: started
+#    enabled: true

@@ -4,6 +4,8 @@
   roles:
     - common
     - k8s
-      #  vars_files:
-      #- roles/common/vars/main.yml
-      #- roles/k8s/vars/main.yml
+
+- hosts: master
+  become: yes
+  roles:
+    - master

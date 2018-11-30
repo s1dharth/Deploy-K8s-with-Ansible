@@ -1,2 +1,14 @@
 ---
 # vars file for master
+
+#hosts_list:
+#  - name: master.example.com
+#    ipaddr: 172.25.230.182
+#  - name: node2.example.com
+#    ipaddr: 172.25.230.4
+#  - name: node3.example.com
+#    ipaddr: 172.25.230.129
+
+#master_pkgs:
+#  - etcd
+#  - flanneld
