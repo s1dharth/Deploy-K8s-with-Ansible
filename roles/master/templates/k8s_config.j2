@@ -13,7 +13,7 @@
 #   kubelet.service
 #   kube-proxy.service
 # logging to stderr means we get it in the systemd journal
-KUBE_ETCD_SERVERS="--etcd-servers=http://"{{ ansible_default_ipv4.address }}":2379"
+KUBE_ETCD_SERVERS="--etcd-servers=http://{{ ansible_default_ipv4.address }}:2379"
 
 #
 # KUBE_ETCD_SERVERS="--etcd-servers=http://172.25.230.182:2379"
@@ -27,4 +27,4 @@ KUBE_LOG_LEVEL="--v=0"
 KUBE_ALLOW_PRIV="--allow-privileged=false"
 
 # How the controller-manager, scheduler, and proxy find the apiserver
-KUBE_MASTER="--master=http://"{{ ansible_default_ipv4.address }}":8080"
+KUBE_MASTER="--master=http://{{ ansible_default_ipv4.address }}:8080"

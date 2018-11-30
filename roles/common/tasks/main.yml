@@ -108,15 +108,21 @@
   command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   register: docker_repo
 
-#- name: Installing Docker
-#  package:
-#    name: docker-ce
-#    state: latest
-#  when: docker_repo.rc==0
-#  register: docker_pkg
+#- name: Ensuring Docker service is stopped
+#  service:
+#    name: docker
+#    state: stopped
+#    enabled: false
+
+- name: Removing existing docker-ce packages
+  package:
+    name:
+     - docker-ce-cli
+     - docker-ce
+    state: absent
 
 #- name: Ensuring Docker service is running
 #  service:
 #    name: docker
 #    state: started
-#    enabled: true
+#    enabled: tr

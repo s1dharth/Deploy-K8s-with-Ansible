@@ -26,7 +26,7 @@
   command: openssl genrsa -out /srv/kubernetes/ca.key 2048
 
 - name: Assign MASTER_IP variable with Master IP
-  shell: "MASTER_IP={{ ansible_default_ipv4.address }}"
+  shell: echo "MASTER_IP={{ ansible_default_ipv4.address }}" >> ~/.bashrc
 
 - name: Generate ca.crt according to ca.key
   command: openssl req -x509 -new -nodes -key /srv/kubernetes/ca.key -subj "/CN=${MASTER_IP}" -days 10000 -out /srv/kubernetes/ca.crt
@@ -67,15 +67,15 @@
 - name: Start and enable etcd service
   service:
     name: etcd
-    state: started
+    state: restarted
     enabled: yes
 
 - name: Create new key in etcd to store flannel configuration
   command: etcdctl mkdir /kube-centos/network
-
+  ignore_errors: yes
 - name: create config
   command: etcdctl mk /kube-centos/network/config "{\"Network\":\"172.30.0.0/16\",\"SubnetLen\":24,\"Backend\":{\"Type\":\"vxlan\"}}"
-
+  ignore_errors: yes
 - name: flanneld configuration in /etc/sysconfig/flanneld
   template:
     src: flanneld.j2
@@ -87,7 +87,7 @@
 - name: start and enable kube-apiserver, kube-controller-manager, kube-scheduler, flanneld services
   service:
     name: "{{ item }}"
-    state: started
+    state: restarted
     enabled: yes
   with_items:
     - kube-apiserver

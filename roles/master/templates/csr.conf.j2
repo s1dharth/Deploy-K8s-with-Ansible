@@ -11,7 +11,7 @@ ST=Delhi
 L=New Delhi
 O=Koenig Solutions Ltd
 OU=Training
-CN={{ hosts_list[0]['ipaddr'] }}
+CN={{ ansible_default_ipv4.address }}
 
 [req_ext]
 subjectAltName=@alt_names
@@ -22,7 +22,7 @@ DNS.2=kubernetes.default
 DNS.3=kubernetes.default.svc
 DNS.4=kuberneted.default.svc.cluster
 DNS.5=kubernetes.default.svc.cluster.local
-IP.1={{ hosts_list[0]['ipaddr'] }}
+IP.1={{ ansible_default_ipv4.address }}
 IP.2=10.254.0.1
 
 [v3_ext]

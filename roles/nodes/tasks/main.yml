@@ -27,6 +27,11 @@
 
 - name: start services - kube-proxy kubelet flanneld docker
   service:
-    name: {{ item }}
+    name: "{{ item }}"
     state: restarted
     enabled: yes
+  with_items:
+    - kube-proxy
+    - kubelet
+    - flanneld
+    - docker

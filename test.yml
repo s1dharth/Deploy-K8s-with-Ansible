@@ -9,3 +9,8 @@
   become: yes
   roles:
     - master
+
+- hosts: nodes
+  become: yes
+  roles:
+    - nodes

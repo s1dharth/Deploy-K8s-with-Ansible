@@ -3,11 +3,11 @@
 
 hosts_list:
   - name: master.example.com
-    ipaddr: 172.25.230.182
+    ipaddr: 172.25.230.95
   - name: node2.example.com
-    ipaddr: 172.25.230.4
+    ipaddr: 172.25.2301.118
   - name: node3.example.com
-    ipaddr: 172.25.230.129
+    ipaddr: 172.25.230.180
 
 #master_pkgs:
 #  - etcd
